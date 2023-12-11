@@ -11,12 +11,15 @@ pragma solidity ^0.8.0;
  */
 
 interface ISphereXEngine {
-    function sphereXValidatePre(int256 num, address sender, bytes calldata data) external returns (bytes32[] memory);
+    function sphereXValidatePre(int256 num) external returns (bytes32[] memory);
     function sphereXValidatePost(
         int256 num,
         uint256 gas,
         bytes32[] calldata valuesBefore,
-        bytes32[] calldata valuesAfter
+        bytes32[] calldata valuesAfter,
+        address sender,
+        bytes calldata data,
+        bytes calldata returnData
     ) external;
     function sphereXValidateInternalPre(int256 num) external returns (bytes32[] memory);
     function sphereXValidateInternalPost(

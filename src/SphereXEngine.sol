@@ -246,7 +246,7 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
      * @param data For future use
      * @return result in the future will return instruction on what storage slots to gather, but not used for now
      */
-    function sphereXValidatePre(int256 num, address sender, bytes calldata data)
+    function sphereXValidatePre(int256 num)
         external
         override
         returnsIfNotActivated // may return empty bytes32[]
@@ -268,7 +268,10 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
         int256 num,
         uint256 gas,
         bytes32[] calldata valuesBefore,
-        bytes32[] calldata valuesAfter
+        bytes32[] calldata valuesAfter,
+        address sender,
+        bytes calldata data,
+        bytes calldata returnData
     ) external override returnsIfNotActivated onlyApprovedSenders {
         _addCfElementFunctionExit(num, true);
     }
