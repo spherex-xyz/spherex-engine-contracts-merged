@@ -20,10 +20,12 @@ abstract contract SphereXProtectedProxy is SphereXProxyBase, Proxy {
      * @param implementation delegate dst
      */
     function _protectedDelegate(address implementation) private returns (bytes memory ret) {
-        ModifierLocals memory locals = _sphereXValidatePre(int256(uint256(uint32(msg.sig))), true);
+        int256 num = int256(uint256(uint32(msg.sig)));
+        ModifierLocals memory locals = _sphereXValidatePre(num, true);
+
         ret = Address.functionDelegateCall(implementation, msg.data);
-        _sphereXValidatePost(-int256(uint256(uint32(msg.sig))), true, locals, ret);
-        return ret;
+
+        _sphereXValidatePost(-num, true, locals, ret);
     }
 
     /**
