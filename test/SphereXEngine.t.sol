@@ -193,7 +193,7 @@ contract SphereXEngineTest is Test, CFUtils {
         spherex_engine.configureRules(CF);
         vm.expectRevert("SphereX error: disallowed sender");
         vm.prank(random_address);
-        spherex_engine.sphereXValidatePre(1, address(this), msg.data);
+        spherex_engine.sphereXValidatePre(1);
     }
 
     function test_onlyApprovedSenders_sphereXValidatePost() public {
@@ -201,7 +201,7 @@ contract SphereXEngineTest is Test, CFUtils {
         vm.expectRevert("SphereX error: disallowed sender");
         vm.prank(random_address);
         bytes32[] memory emptyArray = new bytes32[](0);
-        spherex_engine.sphereXValidatePost(1, 0, emptyArray, emptyArray);
+        spherex_engine.sphereXValidatePost(1, 0, emptyArray, emptyArray, address(this), msg.data, bytes(""));
     }
 
     function test_returnsIfNotActivated_sphereXValidateInternalPre() public {
@@ -214,9 +214,9 @@ contract SphereXEngineTest is Test, CFUtils {
 
     function test_returnsIfNotActivated_sphereXValidatePrePost() public {
         spherex_engine.deactivateAllRules();
-        spherex_engine.sphereXValidatePre(1, address(this), msg.data);
+        spherex_engine.sphereXValidatePre(1);
         bytes32[] memory emptyArray = new bytes32[](0);
-        spherex_engine.sphereXValidatePost(-1, 0, emptyArray, emptyArray);
+        spherex_engine.sphereXValidatePost(-1, 0, emptyArray, emptyArray, address(this), msg.data, bytes(""));
 
         assertFlowStorageSlotsInInitialState();
     }
@@ -278,11 +278,13 @@ contract SphereXEngineTest is Test, CFUtils {
         for (uint256 i = 0; i < allowed_cf_storage.length; i++) {
             if (allowed_cf_storage[i] > 0) {
                 bytes memory empty;
-                spherex_engine.sphereXValidatePre(allowed_cf_storage[i], address(0), empty);
+                spherex_engine.sphereXValidatePre(allowed_cf_storage[i]);
             }
             if (allowed_cf_storage[i] < 0) {
                 bytes32[] memory empty;
-                spherex_engine.sphereXValidatePost(allowed_cf_storage[i], 0, empty, empty);
+                spherex_engine.sphereXValidatePost(
+                    allowed_cf_storage[i], 0, empty, empty, address(this), msg.data, bytes("")
+                );
             }
         }
 
@@ -291,12 +293,12 @@ contract SphereXEngineTest is Test, CFUtils {
 
     function test_sphereXValidatePrePost_not_allowed_cf() public activateRule(CF) {
         bytes memory empty;
-        spherex_engine.sphereXValidatePre(1, address(0), empty);
+        spherex_engine.sphereXValidatePre(1);
 
         vm.expectRevert(bytes("SphereX error: disallowed tx pattern"));
 
         bytes32[] memory empty2;
-        spherex_engine.sphereXValidatePost(-1, 0, empty2, empty2);
+        spherex_engine.sphereXValidatePost(-1, 0, empty2, empty2, address(this), msg.data, bytes(""));
     }
 
     // allowed call flow is [1,2,3,4,5,-5,-4,-3,-2,-1]

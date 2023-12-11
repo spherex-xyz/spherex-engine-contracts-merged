@@ -41,8 +41,7 @@ contract ProtectedBeaconProxy is BeaconProxy {
     }
 
     function _before(address engine) private returns (ModifierLocals memory locals) {
-        locals.storageSlots =
-            ISphereXEngine(engine).sphereXValidatePre(int256(uint256(uint32(msg.sig))), msg.sender, msg.data);
+        locals.storageSlots = ISphereXEngine(engine).sphereXValidatePre(int256(uint256(uint32(msg.sig))));
         locals.valuesBefore = _readStorage(locals.storageSlots);
         locals.gas = gasleft();
 
@@ -55,7 +54,7 @@ contract ProtectedBeaconProxy is BeaconProxy {
         valuesAfter = _readStorage(locals.storageSlots);
 
         ISphereXEngine(engine).sphereXValidatePost(
-            -int256(uint256(uint32(msg.sig))), gas, locals.valuesBefore, valuesAfter
+            -int256(uint256(uint32(msg.sig))), gas, locals.valuesBefore, valuesAfter, msg.sender, msg.data, bytes("")
         );
     }
 

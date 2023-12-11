@@ -242,8 +242,6 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
      * This is the function that is actually called by the modifier of the protected contract before the body of the function.
      * This is used only for external call functions.
      * @param num id of function to add. Should be positive
-     * @param sender For future use
-     * @param data For future use
      * @return result in the future will return instruction on what storage slots to gather, but not used for now
      */
     function sphereXValidatePre(int256 num)

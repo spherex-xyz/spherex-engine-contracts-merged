@@ -212,7 +212,7 @@ abstract contract SphereXProtectedBase {
     {
         ISphereXEngine sphereXEngine = _sphereXEngine();
         if (isExternalCall) {
-            locals.storageSlots = sphereXEngine.sphereXValidatePre(num, msg.sender, msg.data);
+            locals.storageSlots = sphereXEngine.sphereXValidatePre(num);
         } else {
             locals.storageSlots = sphereXEngine.sphereXValidateInternalPre(num);
         }
@@ -240,7 +240,9 @@ abstract contract SphereXProtectedBase {
         valuesAfter = _readStorage(locals.storageSlots);
 
         if (isExternalCall) {
-            sphereXEngine.sphereXValidatePost(num, gas, locals.valuesBefore, valuesAfter);
+            sphereXEngine.sphereXValidatePost(
+                num, gas, locals.valuesBefore, valuesAfter, msg.sender, msg.data, bytes("")
+            );
         } else {
             sphereXEngine.sphereXValidateInternalPost(num, gas, locals.valuesBefore, valuesAfter);
         }

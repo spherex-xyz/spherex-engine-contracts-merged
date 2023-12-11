@@ -190,10 +190,7 @@ contract SphereXProtectedTest is Test, CFUtils {
 
         bytes memory publicFunctionMsgData = abi.encodeWithSelector(costumer_contract.publicFunction.selector);
         bytes memory engineCallMsgData = abi.encodeWithSelector(
-            spherex_engine.sphereXValidatePre.selector,
-            to_int256(costumer_contract.publicFunction.selector),
-            address(1),
-            publicFunctionMsgData
+            spherex_engine.sphereXValidatePre.selector, to_int256(costumer_contract.publicFunction.selector)
         );
         bytes memory engineCallnoMsgData = abi.encodeWithSelector(spherex_engine.sphereXValidatePost.selector);
         vm.expectCall(address(spherex_engine), engineCallMsgData);
@@ -207,10 +204,7 @@ contract SphereXProtectedTest is Test, CFUtils {
     function testExternalFunction() external {
         bytes memory externalFunctionMsgData = abi.encodeWithSelector(costumer_contract.try_allowed_flow.selector);
         bytes memory engineCallMsgData = abi.encodeWithSelector(
-            spherex_engine.sphereXValidatePre.selector,
-            to_int256(costumer_contract.try_allowed_flow.selector),
-            address(1),
-            externalFunctionMsgData
+            spherex_engine.sphereXValidatePre.selector, to_int256(costumer_contract.try_allowed_flow.selector)
         );
         vm.expectCall(address(spherex_engine), engineCallMsgData);
         vm.prank(address(1));
@@ -230,10 +224,7 @@ contract SphereXProtectedTest is Test, CFUtils {
 
         bytes memory externalFunctionMsgData = abi.encodeWithSelector(costumer_contract.call_inner.selector);
         bytes memory engineExternalCallMsgData = abi.encodeWithSelector(
-            spherex_engine.sphereXValidatePre.selector,
-            to_int256(costumer_contract.call_inner.selector),
-            address(1),
-            externalFunctionMsgData
+            spherex_engine.sphereXValidatePre.selector, to_int256(costumer_contract.call_inner.selector)
         );
         bytes memory engineInternalCallMsgData = abi.encodeWithSelector(
             spherex_engine.sphereXValidateInternalPre.selector, to_int256(bytes4(keccak256(bytes("inner()"))))
@@ -258,10 +249,7 @@ contract SphereXProtectedTest is Test, CFUtils {
 
         bytes memory publicCallsPublicMsgData = abi.encodeWithSelector(costumer_contract.publicCallsPublic.selector);
         bytes memory publicCallsPublicEngineCallMsgData = abi.encodeWithSelector(
-            spherex_engine.sphereXValidatePre.selector,
-            to_int256(costumer_contract.publicCallsPublic.selector),
-            address(1),
-            publicCallsPublicMsgData
+            spherex_engine.sphereXValidatePre.selector, to_int256(costumer_contract.publicCallsPublic.selector)
         );
 
         bytes memory publicFunctionEngineCallMsgData = abi.encodeWithSelector(
@@ -301,10 +289,7 @@ contract SphereXProtectedTest is Test, CFUtils {
         bytes memory publicCallsSamePublicMsgData =
             abi.encodeWithSelector(costumer_contract.publicCallsSamePublic.selector, true);
         bytes memory engineCallMsgData = abi.encodeWithSelector(
-            spherex_engine.sphereXValidatePre.selector,
-            to_int256(costumer_contract.publicCallsSamePublic.selector),
-            address(1),
-            publicCallsSamePublicMsgData
+            spherex_engine.sphereXValidatePre.selector, to_int256(costumer_contract.publicCallsSamePublic.selector)
         );
 
         vm.expectCall(address(spherex_engine), engineCallMsgData);
