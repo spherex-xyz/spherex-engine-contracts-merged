@@ -206,7 +206,7 @@ abstract contract SphereXProtectedBase {
      *  or a 'public' function from another address
      */
     function _sphereXValidatePre(int256 num, bool isExternalCall)
-        private
+        internal
         returnsIfNotActivated
         returns (ModifierLocals memory locals)
     {
@@ -228,8 +228,8 @@ abstract contract SphereXProtectedBase {
      * @param isExternalCall set to true if this was called externally
      *  or a 'public' function from another address
      */
-    function _sphereXValidatePost(int256 num, bool isExternalCall, ModifierLocals memory locals)
-        private
+    function _sphereXValidatePost(int256 num, bool isExternalCall, ModifierLocals memory locals, bytes memory ret)
+        internal
         returnsIfNotActivated
     {
         uint256 gas = locals.gas - gasleft();
@@ -240,9 +240,7 @@ abstract contract SphereXProtectedBase {
         valuesAfter = _readStorage(locals.storageSlots);
 
         if (isExternalCall) {
-            sphereXEngine.sphereXValidatePost(
-                num, gas, locals.valuesBefore, valuesAfter, msg.sender, msg.data, bytes("")
-            );
+            sphereXEngine.sphereXValidatePost(num, gas, locals.valuesBefore, valuesAfter, msg.sender, msg.data, ret);
         } else {
             sphereXEngine.sphereXValidateInternalPost(num, gas, locals.valuesBefore, valuesAfter);
         }
@@ -292,7 +290,7 @@ abstract contract SphereXProtectedBase {
     modifier sphereXGuardExternal(int256 num) {
         ModifierLocals memory locals = _sphereXValidatePre(num, true);
         _;
-        _sphereXValidatePost(-num, true, locals);
+        _sphereXValidatePost(-num, true, locals, bytes(""));
     }
 
     /**
@@ -301,7 +299,7 @@ abstract contract SphereXProtectedBase {
     modifier sphereXGuardPublic(int256 num, bytes4 selector) {
         ModifierLocals memory locals = _sphereXValidatePre(num, msg.sig == selector);
         _;
-        _sphereXValidatePost(-num, msg.sig == selector, locals);
+        _sphereXValidatePost(-num, msg.sig == selector, locals, bytes(""));
     }
 
     // ============ Internal Storage logic ============

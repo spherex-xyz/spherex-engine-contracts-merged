@@ -7,6 +7,7 @@ import {Proxy} from "openzeppelin/proxy/Proxy.sol";
 import {Address} from "openzeppelin/utils/Address.sol";
 
 import {SphereXProxyBase} from "./SphereXProxyBase.sol";
+import {ModifierLocals} from "./ISphereXEngine.sol";
 
 /**
  * @title SphereX abstract proxt contract which implements OZ's Proxy intereface.
@@ -18,12 +19,11 @@ abstract contract SphereXProtectedProxy is SphereXProxyBase, Proxy {
      * The main point of the contract, wrap the delegate operation with SphereX's protection modfifier
      * @param implementation delegate dst
      */
-    function _protectedDelegate(address implementation)
-        private
-        sphereXGuardExternal(int256(uint256(uint32(msg.sig))))
-        returns (bytes memory)
-    {
-        return Address.functionDelegateCall(implementation, msg.data);
+    function _protectedDelegate(address implementation) private returns (bytes memory ret) {
+        ModifierLocals memory locals = _sphereXValidatePre(int256(uint256(uint32(msg.sig))), true);
+        ret = Address.functionDelegateCall(implementation, msg.data);
+        _sphereXValidatePost(-int256(uint256(uint32(msg.sig))), true, locals, ret);
+        return ret;
     }
 
     /**
