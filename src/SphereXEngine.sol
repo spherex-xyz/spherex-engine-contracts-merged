@@ -251,7 +251,9 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
         onlyApprovedSenders
         returns (bytes32[] memory result)
     {
-        _addCfElementFunctionEntry(num);
+        if (uint64(_engineRules) & RULES_1_AND_2_TOGETHER != 0) {
+            _addCfElementFunctionEntry(num);
+        }
         return result;
     }
 
@@ -271,7 +273,10 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
         bytes calldata data,
         bytes calldata returnData
     ) external override returnsIfNotActivated onlyApprovedSenders {
-        _addCfElementFunctionExit(num, true);
+        if (uint64(_engineRules) & RULES_1_AND_2_TOGETHER != 0) {
+            _addCfElementFunctionExit(num, true);
+        }
+        _checkRetData(num, sender, data, returnData);
     }
 
     /**
@@ -286,7 +291,9 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
         onlyApprovedSenders
         returns (bytes32[] memory result)
     {
-        _addCfElementFunctionEntry(num);
+        if (uint64(_engineRules) & RULES_1_AND_2_TOGETHER != 0) {
+            _addCfElementFunctionEntry(num);
+        }
     }
 
     /**
@@ -300,6 +307,63 @@ contract SphereXEngine is ISphereXEngine, AccessControlDefaultAdminRules {
         bytes32[] calldata valuesBefore,
         bytes32[] calldata valuesAfter
     ) external override returnsIfNotActivated onlyApprovedSenders {
-        _addCfElementFunctionExit(num, false);
+        if (uint64(_engineRules) & RULES_1_AND_2_TOGETHER != 0) {
+            _addCfElementFunctionExit(num, false);
+        }
+    }
+
+    enum RuleType {
+        DISABLED,
+        // add new rules below this line
+        NOT_CHANGED_THROUGH_TX,
+        MONOTONICALLY_INCREASING,
+        // Add new rules above this line
+        LAST
+    }
+
+    struct retDataValue {
+        bool touched;
+        bytes32 value;
+    }
+
+    struct RetDataRule {
+        RuleType ruleType;
+        uint256 dependsOnDataIndex;
+        mapping(bytes32 => retDataValue) currentValue;
+    }
+
+    mapping(uint256 => RetDataRule) internal _retDataRules;
+
+    function _checkRetData(int256 num, address sender, bytes calldata data, bytes calldata returnData) internal {
+        require(num < 0, "SphereX error: expected negative num");
+
+        RetDataRule storage rule = _retDataRules[uint256(-num)];
+        if (rule.ruleType == RuleType.DISABLED) {
+            return;
+        }
+        if (rule.ruleType == RuleType.NOT_CHANGED_THROUGH_TX) {
+            bytes32 dataDependent = bytes32(0);
+            if (rule.dependsOnDataIndex != 0) {
+                uint256 paramIndex = rule.dependsOnDataIndex - 1;
+                dataDependent = bytes32(data[4 + 32 * paramIndex:4 + 32 * (paramIndex + 1)]);
+            }
+            bytes32 currentTxBoundaryHash =
+                keccak256(abi.encode(block.number, tx.origin, block.timestamp, block.difficulty, dataDependent));
+            retDataValue storage currentValue = rule.currentValue[currentTxBoundaryHash];
+            if (currentValue.touched) {
+                require(currentValue.value == keccak256(returnData), "SphereX error: ret data changed");
+            } else {
+                currentValue.touched = true;
+                currentValue.value = keccak256(returnData);
+            }
+        }
+    }
+
+    function changeRetDataRule(uint256 num, RuleType ruleType, uint256 dependsOnDataIndex) external onlyOperator {
+        require(ruleType < RuleType.LAST, "SphereX error: invalid rule type");
+
+        RetDataRule storage rule = _retDataRules[num];
+        rule.ruleType = ruleType;
+        rule.dependsOnDataIndex = dependsOnDataIndex;
     }
 }
